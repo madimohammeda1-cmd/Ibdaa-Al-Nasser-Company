@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - نظام المبيعات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- الشريط الجانبي -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-chart-line"></i>
+            <h2>المبيعات</h2>
+        </div>
+
+        <ul class="menu">
+            <li class="menu-item">
+                <a href="dashboard.html" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="invoices/list.html">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>الفواتير</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="customers/list.html">
+                    <i class="fas fa-users"></i>
+                    <span>الزبائن</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="products/list.html">
+                    <i class="fas fa-box"></i>
+                    <span>المنتجات</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="reports.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>التقارير</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>خروج</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- رأس الصفحة -->
+        <div class="page-header">
+            <div>
+                <h1><i class="fas fa-chart-line"></i> لوحة التحكم</h1>
+                <div class="breadcrumb">أهلاً بك في نظام المبيعات المتكامل</div>
+            </div>
+            <div>
+                <a href="invoices/create.html" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> فاتورة جديدة
+                </a>
+            </div>
+        </div>
+
+        <!-- الإحصائيات -->
+        <div class="grid grid-4">
+            <div class="stat-card">
+                <i class="fas fa-file-invoice stat-icon"></i>
+                <div class="stat-title">الفواتير</div>
+                <div class="stat-value" id="invoicesCount">0</div>
+                <div class="stat-value" style="font-size: 1rem; color: #667eea;" id="invoicesTotalAmount">0 IQD</div>
+            </div>
+
+            <div class="stat-card success">
+                <i class="fas fa-dollar-sign stat-icon" style="color: #27ae60;"></i>
+                <div class="stat-title">المدفوعات</div>
+                <div class="stat-value" id="paymentsCount">0</div>
+                <div class="stat-value" style="font-size: 1rem; color: #27ae60;" id="paymentsTotalAmount">0 IQD</div>
+            </div>
+
+            <div class="stat-card warning">
+                <i class="fas fa-hourglass stat-icon" style="color: #f39c12;"></i>
+                <div class="stat-title">مستحقات</div>
+                <div class="stat-value" id="dueInvoicesCount">0</div>
+                <div class="stat-value" style="font-size: 1rem; color: #f39c12;" id="dueAmount">0 IQD</div>
+            </div>
+
+            <div class="stat-card danger">
+                <i class="fas fa-users stat-icon" style="color: #e74c3c;"></i>
+                <div class="stat-title">الزبائن</div>
+                <div class="stat-value" id="customersCount">0</div>
+                <div class="stat-value" style="font-size: 1rem; color: #e74c3c;">نشط</div>
+            </div>
+        </div>
+
+        <!-- الرسوم البيانية -->
+        <div class="grid grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-line"></i> المبيعات الشهرية</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> توزيع الفواتير</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="paymentStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- آخر الفواتير -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-file-invoice"></i> آخر الفواتير</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>الزبون</th>
+                                <th>المبلغ</th>
+                                <th>المدفوع</th>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                                <th>الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentInvoices">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                                    <p style="color: #999; margin-top: 0.5rem;">لا توجد فواتير حتى الآن</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        // تحميل البيانات
+        async function loadDashboard() {
+            try {
+                const response = await fetch('api/dashboard.php');
+                const data = await response.json();
+
+                if (data.success) {
+                    // تحديث الإحصائيات
+                    document.getElementById('invoicesCount').textContent = data.data.invoices_count;
+                    document.getElementById('invoicesTotalAmount').textContent = formatCurrency(data.data.invoices_total);
+                    document.getElementById('paymentsCount').textContent = data.data.payments_count;
+                    document.getElementById('paymentsTotalAmount').textContent = formatCurrency(data.data.payments_total);
+                    document.getElementById('dueInvoicesCount').textContent = data.data.due_invoices_count;
+                    document.getElementById('dueAmount').textContent = formatCurrency(data.data.due_amount);
+                    document.getElementById('customersCount').textContent = data.data.customers_count;
+
+                    // تحديث الجدول
+                    loadRecentInvoices(data.data.recent_invoices);
+
+                    // تحديث الرسوم البيانية
+                    loadCharts(data.data.chart_data);
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+            }
+        }
+
+        function loadRecentInvoices(invoices) {
+            const tbody = document.getElementById('recentInvoices');
+            tbody.innerHTML = '';
+
+            if (invoices.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                            <p style="color: #999; margin-top: 0.5rem;">لا توجد فواتير</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            invoices.forEach(invoice => {
+                const statusBadge = invoice.payment_status === 'paid' ? 
+                    '<span class="badge badge-success">مدفوعة</span>' :
+                    invoice.payment_status === 'partial' ?
+                    '<span class="badge badge-warning">دفع جزئي</span>' :
+                    '<span class="badge badge-danger">غير مدفوعة</span>';
+
+                tbody.innerHTML += `
+                    <tr data-id="${invoice.id}">
+                        <td><strong>${invoice.invoice_number}</strong></td>
+                        <td>${invoice.customer_name}</td>
+                        <td>${formatCurrency(invoice.total)}</td>
+                        <td>${formatCurrency(invoice.paid_amount)}</td>
+                        <td>${statusBadge}</td>
+                        <td>${formatDate(invoice.invoice_date)}</td>
+                        <td>
+                            <a href="invoices/view.html?id=${invoice.id}" class="btn btn-primary btn-small" title="عرض">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function loadCharts(chartData) {
+            // رسم بياني المبيعات الشهرية
+            const ctx1 = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: chartData.months,
+                    datasets: [{
+                        label: 'المبيعات',
+                        data: chartData.sales,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+
+            // رسم بياني توزيع الفواتير
+            const ctx2 = document.getElementById('paymentStatusChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['مدفوعة', 'غير مدفوعة', 'دفع جزئي'],
+                    datasets: [{
+                        data: chartData.payment_status,
+                        backgroundColor: ['#27ae60', '#e74c3c', '#f39c12']
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>
